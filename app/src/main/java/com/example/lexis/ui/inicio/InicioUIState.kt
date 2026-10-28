@@ -41,7 +41,6 @@ data class InicioUiState(
         )
     )
 ) {
-    /** Categorías que coinciden con lo escrito en el buscador. */
     val categoriasFiltradas: List<CategoriaLegal>
         get() = categorias.filter { it.titulo.contains(textoBusqueda.trim(), ignoreCase = true) }
 }
