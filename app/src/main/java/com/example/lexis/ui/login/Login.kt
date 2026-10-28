@@ -43,7 +43,6 @@ fun LoginRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // Navega al inicio cuando el login (o la sesión recordada) fue exitoso
     LaunchedEffect(uiState.idUsuarioAutenticado) {
         uiState.idUsuarioAutenticado?.let(alAutenticar)
     }
