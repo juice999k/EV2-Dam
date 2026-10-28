@@ -24,7 +24,6 @@ class InicioViewModel(
         cargarUsuario()
     }
 
-    /** Se vuelve a llamar al regresar desde el perfil para reflejar la foto nueva. */
     fun cargarUsuario() {
         viewModelScope.launch {
             repositorio.obtenerUsuario(idUsuario)?.let { usuario ->
