@@ -10,13 +10,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-/** Única fuente de datos de usuarios: oculta Room y el almacenamiento de fotos al resto de la app. */
 class UsuarioRepository(
     private val usuarioDao: UsuarioDao,
     private val contexto: Context
 ) {
 
-    /** Registra un usuario nuevo. Devuelve false si el correo ya existe. */
     suspend fun registrar(
         nombre: String,
         correo: String,
@@ -37,7 +35,6 @@ class UsuarioRepository(
         return true
     }
 
-    /** Devuelve el usuario si las credenciales son correctas, o null si no lo son. */
     suspend fun iniciarSesion(correo: String, clave: String, recordar: Boolean): UsuarioEntity? {
         val correoNormalizado = correo.trim().lowercase()
         val usuario = usuarioDao.buscarPorCorreo(correoNormalizado) ?: return null
@@ -57,7 +54,6 @@ class UsuarioRepository(
     suspend fun guardarFotoPerfil(idUsuario: Int, foto: Bitmap) = withContext(Dispatchers.IO) {
         val fotoAnterior = usuarioDao.buscarPorId(idUsuario)?.rutaFotoPerfil
 
-        // Nombre único para que la interfaz detecte el cambio de imagen
         val archivo = File(contexto.filesDir, "perfil_${idUsuario}_${System.currentTimeMillis()}.jpg")
         archivo.outputStream().use { salida ->
             foto.compress(Bitmap.CompressFormat.JPEG, CALIDAD_JPEG, salida)
