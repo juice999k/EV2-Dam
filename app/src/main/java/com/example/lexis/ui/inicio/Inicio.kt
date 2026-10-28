@@ -74,7 +74,6 @@ fun InicioRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
  
-    // Al volver desde el perfil se recarga el usuario para mostrar su foto nueva
     LifecycleResumeEffect(Unit) {
         viewModel.cargarUsuario()
         onPauseOrDispose { }
@@ -95,7 +94,7 @@ fun InicioContent(
     onAvatarClick: () -> Unit,
     onContinuarLecturaClick: () -> Unit
 ) {
-    // Animación de entrada de las tarjetas y de la barra de progreso
+
     var contenidoVisible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { contenidoVisible = true }
  
