@@ -61,6 +61,7 @@ fun LectorContent(
 ) {
     val estadoLista = rememberLazyListState()
 
+    // Avance de lectura según el artículo que se está viendo
     val progreso by remember(uiState.articulos.size) {
         derivedStateOf {
             if (uiState.articulos.isEmpty()) 0f
