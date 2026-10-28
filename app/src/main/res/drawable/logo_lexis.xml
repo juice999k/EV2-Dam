@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Logo de Lexis: balanza de la justicia -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <path
+        android:pathData="M48,16 L48,76 M30,80 L66,80 M20,28 L76,28"
+        android:strokeWidth="5"
+        android:strokeColor="#1E3A8A"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M20,28 L10,52 M20,28 L30,52 M10,52 Q20,64 30,52 M76,28 L66,52 M76,28 L86,52 M66,52 Q76,64 86,52"
+        android:strokeWidth="3.5"
+        android:strokeColor="#1E3A8A"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M48,9 a5,5 0 1,0 0.01,0 z" />
+</vector>

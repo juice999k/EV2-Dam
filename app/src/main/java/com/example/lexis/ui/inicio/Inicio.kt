@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lexis.ui.viewmodel.InicioViewModel
+import com.example.lexis.viewmodel.InicioViewModel
 
 @Composable
 fun InicioScreen(
@@ -38,7 +38,6 @@ fun InicioScreen(
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        // --- Top Bar Header ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -89,13 +88,11 @@ fun InicioScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // --- Saludo ---
         Text("BUENOS DÍAS", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
         Text("Hola, ${uiState.userName}", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1F2937))
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Barra de Búsqueda ---
         OutlinedTextField(
             value = "",
             onValueChange = {},
@@ -113,7 +110,6 @@ fun InicioScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- Tarjeta 'Continuar Leyendo' ---
         Card(
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1C4570)),
@@ -172,7 +168,6 @@ fun InicioScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- Sección 'Explora - Materias jurídicas' ---
         Text("EXPLORA", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -220,7 +215,6 @@ fun InicioScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- Sección 'Al Día - Cambios recientes' ---
         Text("AL DÍA", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
         Row(
             modifier = Modifier.fillMaxWidth(),

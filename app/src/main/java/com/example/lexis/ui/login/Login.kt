@@ -8,178 +8,171 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.lexis.ui.viewmodel.LoginViewModel
+import com.example.lexis.ui.components.CampoClave
+import com.example.lexis.ui.components.LogoAnimado
+import com.example.lexis.ui.components.ModalMensaje
+import com.example.lexis.viewmodel.LexisViewModelFactory
+import com.example.lexis.viewmodel.LoginViewModel
 
 @Composable
 fun LoginRoute(
-    viewModel: LoginViewModel = viewModel()
+    alAutenticar: (idUsuario: Int) -> Unit,
+    alIrARegistro: () -> Unit,
+    viewModel: LoginViewModel = viewModel(factory = LexisViewModelFactory.login)
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    // Navega al inicio cuando el login (o la sesión recordada) fue exitoso
+    LaunchedEffect(uiState.idUsuarioAutenticado) {
+        uiState.idUsuarioAutenticado?.let(alAutenticar)
+    }
+
     LoginContent(
         uiState = uiState,
-        onUsernameChanged = viewModel::onUsernameChanged,
-        onPasswordChanged = viewModel::onPasswordChanged,
+        onCorreoChanged = viewModel::onCorreoChanged,
+        onClaveChanged = viewModel::onClaveChanged,
         onRecordarChanged = viewModel::onRecordarChanged,
         onIngresarClick = viewModel::onIngresarClick,
-        onDismissModalLogin = viewModel::onDismissModalLogin,
-        onRegistrarClick = viewModel::onRegistrarClick,
-        onDismissModalRegistro = viewModel::onDismissModalRegistro,
+        onRegistrarClick = alIrARegistro,
         onOlvidastePasswordClick = viewModel::onOlvidastePasswordClick,
+        onDismissModalError = viewModel::onDismissModalError,
         onDismissModalOlvidar = viewModel::onDismissModalOlvidar
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginContent(
     uiState: LoginUiState,
-    onUsernameChanged: (String) -> Unit,
-    onPasswordChanged: (String) -> Unit,
+    onCorreoChanged: (String) -> Unit,
+    onClaveChanged: (String) -> Unit,
     onRecordarChanged: (Boolean) -> Unit,
     onIngresarClick: () -> Unit,
-    onDismissModalLogin: () -> Unit,
     onRegistrarClick: () -> Unit,
-    onDismissModalRegistro: () -> Unit,
     onOlvidastePasswordClick: () -> Unit,
+    onDismissModalError: () -> Unit,
     onDismissModalOlvidar: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = "Lexis - App Jurídica") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
-    ) { paddingValues ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        LogoAnimado(tamano = 120.dp)
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Text(
+            text = "LEXIS",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = "Tu biblioteca jurídica en el bolsillo",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        OutlinedTextField(
+            value = uiState.correo,
+            onValueChange = onCorreoChanged,
+            label = { Text("Correo") },
+            singleLine = true,
+            isError = uiState.errorCorreo != null,
+            supportingText = uiState.errorCorreo?.let { { Text(it) } },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        CampoClave(
+            valor = uiState.clave,
+            alCambiar = onClaveChanged,
+            etiqueta = "Contraseña",
+            mensajeError = uiState.errorClave,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-
-            Text(text = "Correo")
-
-            OutlinedTextField(
-                value = uiState.username,
-                onValueChange = onUsernameChanged,
-                label = { Text("Introduce tu correo") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(text = "Contraseña")
-
-            OutlinedTextField(
-                value = uiState.password,
-                onValueChange = onPasswordChanged,
-                label = { Text("Introduce tu contraseña") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = uiState.recordarUsuario,
-                        onCheckedChange = onRecordarChanged
-                    )
-                    Text(text = "Recordar")
-                }
-
-                TextButton(onClick = onOlvidastePasswordClick) {
-                    Text(text = "¿Olvidaste tu contraseña?")
-                }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = uiState.recordarUsuario,
+                    onCheckedChange = onRecordarChanged
+                )
+                Text(text = "Recordar")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            TextButton(onClick = onOlvidastePasswordClick) {
+                Text(text = "¿Olvidaste tu contraseña?")
+            }
+        }
 
-            Button(
-                onClick = onIngresarClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onIngresarClick,
+            enabled = !uiState.cargando,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            if (uiState.cargando) {
+                CircularProgressIndicator(modifier = Modifier.height(20.dp), strokeWidth = 2.dp)
+            } else {
                 Text(text = "Ingresar")
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedButton(
-                onClick = onRegistrarClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Registrarse")
-            }
-
-            if (uiState.mostrarModalLogin) {
-                AlertDialog(
-                    onDismissRequest = onDismissModalLogin,
-                    title = { Text("Mensaje") },
-                    text = { Text("Iniciando sesión con: ${uiState.username}") },
-                    confirmButton = {
-                        Button(onClick = onDismissModalLogin) {
-                            Text("OK")
-                        }
-                    }
-                )
-            }
-
-            if (uiState.mostrarModalRegistro) {
-                AlertDialog(
-                    onDismissRequest = onDismissModalRegistro,
-                    title = { Text("Registro de Usuario") },
-                    text = { Text(uiState.mensajeRegistro) },
-                    confirmButton = {
-                        Button(onClick = onDismissModalRegistro) {
-                            Text("Aceptar")
-                        }
-                    }
-                )
-            }
-
-            if (uiState.mostrarModalOlvidar) {
-                AlertDialog(
-                    onDismissRequest = onDismissModalOlvidar,
-                    title = { Text("Recuperar Contraseña") },
-                    text = { Text(uiState.mensajeOlvidar) },
-                    confirmButton = {
-                        Button(onClick = onDismissModalOlvidar) {
-                            Text("Aceptar")
-                        }
-                    }
-                )
-            }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedButton(
+            onClick = onRegistrarClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Crear cuenta")
+        }
+    }
+
+    if (uiState.mostrarModalError) {
+        ModalMensaje(
+            titulo = "No pudimos iniciar sesión",
+            mensaje = uiState.mensajeError,
+            alCerrar = onDismissModalError
+        )
+    }
+
+    if (uiState.mostrarModalOlvidar) {
+        ModalMensaje(
+            titulo = "Recuperar contraseña",
+            mensaje = uiState.mensajeOlvidar,
+            alCerrar = onDismissModalOlvidar
+        )
     }
 }

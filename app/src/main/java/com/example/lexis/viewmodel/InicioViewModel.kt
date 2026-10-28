@@ -1,4 +1,4 @@
-package com.example.lexis.ui.viewmodel
+package com.example.lexis.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.example.lexis.ui.inicio.InicioUiState
