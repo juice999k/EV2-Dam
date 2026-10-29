@@ -117,5 +117,5 @@ La aplicación solicita acceso a la cámara al tomar una foto de perfil. Si el p
 
 ## Integrantes
 
-- **[Martin Sandoval]** — [@juice999k](https://github.com/juice999k)
-- **[Lukas Vicker]** — [Vicker10](https://github.com/Vicker10)
+- **Martin Sandoval** — [@juice999k](https://github.com/juice999k)
+- **Lukas Vicker** — [@Vicker10](https://github.com/Vicker10)
