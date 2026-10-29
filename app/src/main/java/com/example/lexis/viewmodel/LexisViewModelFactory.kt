@@ -7,7 +7,11 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.lexis.LexisApplication
  
 object LexisViewModelFactory {
- 
+
+    fun perfil(idUsuario: Int) = viewModelFactory {
+        initializer { PerfilViewModel(repositorio(), idUsuario) }
+    }
+
     private fun CreationExtras.repositorio() =
         (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as LexisApplication)
             .repositorioUsuarios

@@ -10,6 +10,7 @@ import com.example.lexis.ui.inicio.InicioRoute
 import com.example.lexis.ui.lector.LectorRoute
 import com.example.lexis.ui.login.LoginRoute
 import com.example.lexis.ui.registro.RegistroRoute
+import com.example.lexis.ui.perfil.PerfilRoute
 
 @Composable
 fun LexisNavHost() {
@@ -37,13 +38,34 @@ fun LexisNavHost() {
             val idUsuario = entrada.arguments?.getInt(Rutas.ARGUMENTO_ID_USUARIO) ?: 0
             InicioRoute(
                 idUsuario = idUsuario,
-                alIrAPerfil = { },
+                alIrAPerfil = {
+                    navController.navigate(Rutas.perfil(idUsuario))
+                },
                 alIrALector = { navController.navigate(Rutas.LECTOR) }
             )
         }
 
         composable(Rutas.LECTOR) {
             LectorRoute(alVolver = { navController.popBackStack() })
+        }
+
+        composable(Rutas.PERFIL, arguments = argumentoUsuario) { entrada ->
+            val idUsuario =
+                entrada.arguments?.getInt(Rutas.ARGUMENTO_ID_USUARIO) ?: 0
+
+            PerfilRoute(
+                idUsuario = idUsuario,
+                alVolver = {
+                    navController.popBackStack()
+                },
+                alCerrarSesion = {
+                    navController.navigate(Rutas.LOGIN) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
 }
 }
