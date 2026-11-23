@@ -4,6 +4,7 @@ import com.example.lexis.model.CategoriaDto
 import com.example.lexis.remote.LexisApiService
 import com.example.lexis.model.NormaDto
 import com.example.lexis.model.ArticuloDto
+import com.example.lexis.model.NovedadDto
 
 class BibliotecaRepository(
     private val api: LexisApiService
@@ -21,5 +22,8 @@ class BibliotecaRepository(
     suspend fun obtenerArticulos(normaId: Int): List<ArticuloDto> {
         return api.obtenerArticulos(normaId)
             .sortedBy { it.numero.toIntOrNull() ?: Int.MAX_VALUE }
+    }
+    suspend fun obtenerNovedades(): List<NovedadDto> {
+        return api.obtenerNovedades()
     }
 }

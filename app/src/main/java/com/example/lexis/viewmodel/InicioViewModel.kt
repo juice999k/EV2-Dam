@@ -28,6 +28,7 @@ class InicioViewModel(
     init {
         cargarUsuario()
         cargarCategorias()
+        cargarNovedades()
     }
 
     fun cargarUsuario() {
@@ -91,6 +92,43 @@ class InicioViewModel(
         }
     }
 
+
+    fun cargarNovedades() {
+        if (_uiState.value.cargandoNovedades) return
+
+        _uiState.update {
+            it.copy(cargandoNovedades = true, errorNovedades = null)
+        }
+
+        viewModelScope.launch {
+            try {
+                val novedades = bibliotecaRepository.obtenerNovedades()
+                    .sortedByDescending { it.fecha }
+
+                _uiState.update {
+                    it.copy(
+                        novedades = novedades,
+                        cargandoNovedades = false,
+                        errorNovedades = null
+                    )
+                }
+            } catch (excepcion: IOException) {
+                _uiState.update {
+                    it.copy(
+                        cargandoNovedades = false,
+                        errorNovedades = "No se pudo conectar para cargar las novedades."
+                    )
+                }
+            } catch (excepcion: HttpException) {
+                _uiState.update {
+                    it.copy(
+                        cargandoNovedades = false,
+                        errorNovedades = "No se pudieron cargar las novedades. Inténtalo nuevamente."
+                    )
+                }
+            }
+        }
+    }
 
     fun onBusquedaChanged(nuevoTexto: String) {
         _uiState.update { it.copy(textoBusqueda = nuevoTexto) }

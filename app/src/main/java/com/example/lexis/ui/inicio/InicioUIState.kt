@@ -1,17 +1,11 @@
 package com.example.lexis.ui.inicio
 
+import com.example.lexis.model.NovedadDto
+
 data class CategoriaLegal(
     val titulo: String,
     val id: Int = 0,
     val descripcion: String = ""
-)
-data class CambioReciente(
-    val dia: String,
-    val mes: String,
-    val etiqueta: String,
-    val titulo: String,
-    val subtitulo: String,
-    val tiempoYCantidad: String
 )
 
 data class InicioUiState(
@@ -23,17 +17,12 @@ data class InicioUiState(
     val categorias: List<CategoriaLegal> = emptyList(),
     val cargandoCategorias: Boolean = false,
     val errorCategorias: String? = null,
-    val cambiosRecientes: List<CambioReciente> = listOf(
-        CambioReciente(
-            dia = "14",
-            mes = "MAY",
-            etiqueta = "MODIFICADA",
-            titulo = "Ley Federal del Trabajo",
-            subtitulo = "Reforma sobre jornadas y descanso laboral",
-            tiempoYCantidad = "Hace 2 días · 4 artículos"
-        )
-    )
+    val novedades: List<NovedadDto> = emptyList(),
+    val cargandoNovedades: Boolean = false,
+    val errorNovedades: String? = null
 ) {
     val categoriasFiltradas: List<CategoriaLegal>
-        get() = categorias.filter { it.titulo.contains(textoBusqueda.trim(), ignoreCase = true) }
+        get() = categorias.filter {
+            it.titulo.contains(textoBusqueda.trim(), ignoreCase = true)
+        }
 }

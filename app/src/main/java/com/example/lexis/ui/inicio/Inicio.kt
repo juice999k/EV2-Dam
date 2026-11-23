@@ -17,14 +17,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,8 +38,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lexis.ui.components.AvatarUsuario
 import com.example.lexis.ui.components.LogoAnimado
-import com.example.lexis.ui.theme.AmbarClaro
-import com.example.lexis.ui.theme.AmbarOscuro
 import com.example.lexis.ui.theme.AzulLexis
 import com.example.lexis.ui.theme.BordeSuave
 import com.example.lexis.ui.theme.FondoClaro
@@ -74,7 +70,8 @@ fun InicioRoute(
         onBusquedaChanged = viewModel::onBusquedaChanged,
         onAvatarClick = alIrAPerfil,
         onReintentarCategorias = viewModel::cargarCategorias,
-        onCategoriaClick = alIrANormas
+        onCategoriaClick = alIrANormas,
+        onReintentarNovedades = viewModel::cargarNovedades
     )
 }
 
@@ -84,7 +81,8 @@ fun InicioContent(
     onBusquedaChanged: (String) -> Unit,
     onAvatarClick: () -> Unit,
     onReintentarCategorias: () -> Unit,
-    onCategoriaClick: (Int) -> Unit
+    onCategoriaClick: (Int) -> Unit,
+    onReintentarNovedades: () -> Unit
 ) {
 
     Column(
@@ -129,7 +127,10 @@ fun InicioContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        SeccionCambiosRecientes(uiState = uiState)
+        SeccionNovedades(
+            uiState = uiState,
+            onReintentar = onReintentarNovedades
+        )
     }
 }
 
@@ -278,49 +279,83 @@ private fun SeccionMaterias(
 }
 
 @Composable
-private fun SeccionCambiosRecientes(uiState: InicioUiState) {
+private fun SeccionNovedades(
+    uiState: InicioUiState,
+    onReintentar: () -> Unit
+) {
     Text("AL DÍA", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = GrisSuave)
-    Text("Cambios recientes", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextoOscuro)
+    Text("Novedades de la biblioteca", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextoOscuro)
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    uiState.cambiosRecientes.forEach { cambio ->
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    if (uiState.cargandoNovedades) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                strokeWidth = 2.dp,
+                color = AzulLexis
+            )
+            Text("Cargando novedades...", color = GrisSuave)
+        }
+        return
+    }
+
+    val error = uiState.errorNovedades
+    if (error != null) {
+        Text(error, color = TextoOscuro)
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(onClick = onReintentar) {
+            Text("Reintentar novedades")
+        }
+        return
+    }
+
+    if (uiState.novedades.isEmpty()) {
+        Text("No hay novedades disponibles.", color = GrisSuave)
+        return
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        uiState.novedades.forEach { novedad ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(cambio.dia, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextoOscuro)
-                    Text(cambio.mes, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = GrisSuave)
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Surface(color = AmbarClaro, shape = RoundedCornerShape(4.dp)) {
-                        Text(
-                            cambio.etiqueta,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                            fontSize = 9.sp,
-                            color = AmbarOscuro,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = novedad.titulo,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AzulLexis
+                    )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(cambio.titulo, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextoOscuro)
-                    Text(cambio.subtitulo, fontSize = 11.sp, color = GrisSuave)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(cambio.tiempoYCantidad, fontSize = 10.sp, color = GrisSuave)
+                    Text(
+                        text = formatearFechaNovedad(novedad.fecha),
+                        fontSize = 11.sp,
+                        color = GrisSuave
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = novedad.descripcion,
+                        fontSize = 13.sp,
+                        color = TextoOscuro
+                    )
                 }
-
-                Icon(Icons.Default.ChevronRight, contentDescription = "Ver más", tint = GrisSuave)
             }
         }
     }
 }
+
+private fun formatearFechaNovedad(fecha: String): String =
+    try {
+        java.time.LocalDate.parse(fecha).format(
+            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        )
+    } catch (excepcion: java.time.format.DateTimeParseException) {
+        fecha
+    }
