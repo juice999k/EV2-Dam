@@ -1,6 +1,7 @@
 package com.example.lexis.repository
 
 import com.example.lexis.model.CategoriaDto
+import com.example.lexis.model.TerminoDto
 import com.example.lexis.remote.LexisApiService
 import com.example.lexis.model.NormaDto
 import com.example.lexis.model.ArticuloDto
@@ -25,5 +26,9 @@ class BibliotecaRepository(
     }
     suspend fun obtenerNovedades(): List<NovedadDto> {
         return api.obtenerNovedades()
+    }
+
+    suspend fun obtenerGlosario(): List<TerminoDto> {
+        return api.obtenerGlosario().sortedBy { it.termino.lowercase() }
     }
 }

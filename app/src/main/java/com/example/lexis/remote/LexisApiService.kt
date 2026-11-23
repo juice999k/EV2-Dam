@@ -2,6 +2,7 @@ package com.example.lexis.remote
 
 
 import com.example.lexis.model.CategoriaDto
+import com.example.lexis.model.TerminoDto
 import retrofit2.http.GET
 import com.example.lexis.model.NormaDto
 import retrofit2.http.Query
@@ -27,4 +28,7 @@ interface LexisApiService {
     ): List<ArticuloDto>
     @GET("novedad")
     suspend fun obtenerNovedades(): List<NovedadDto>
+
+    @GET("glosario")
+    suspend fun obtenerGlosario(): List<TerminoDto>
 }

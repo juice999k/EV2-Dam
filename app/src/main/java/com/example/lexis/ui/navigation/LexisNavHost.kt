@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.lexis.ui.glosario.GlosarioRoute
 import com.example.lexis.ui.inicio.InicioRoute
 import com.example.lexis.ui.lector.LectorRoute
 import com.example.lexis.ui.login.LoginRoute
@@ -43,6 +44,10 @@ fun LexisNavHost() {
             )
         }
 
+        composable(Rutas.GLOSARIO) {
+            GlosarioRoute(alVolver = { navController.popBackStack() })
+        }
+
         composable(Rutas.REGISTRO) {
             RegistroRoute(
                 alVolver = {
@@ -65,6 +70,9 @@ fun LexisNavHost() {
                 },
                 alIrANormas = { categoriaId ->
                     navController.navigate(Rutas.normas(categoriaId))
+                },
+                alIrAGlosario = {
+                    navController.navigate(Rutas.GLOSARIO)
                 }
             )
         }

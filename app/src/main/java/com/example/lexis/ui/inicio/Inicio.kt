@@ -54,6 +54,7 @@ fun InicioRoute(
     idUsuario: Int,
     alIrAPerfil: () -> Unit,
     alIrANormas: (Int) -> Unit,
+    alIrAGlosario: () -> Unit,
     viewModel: InicioViewModel = viewModel(
         factory = LexisViewModelFactory.inicio(idUsuario)
     )
@@ -71,7 +72,8 @@ fun InicioRoute(
         onAvatarClick = alIrAPerfil,
         onReintentarCategorias = viewModel::cargarCategorias,
         onCategoriaClick = alIrANormas,
-        onReintentarNovedades = viewModel::cargarNovedades
+        onReintentarNovedades = viewModel::cargarNovedades,
+        onAbrirGlosario = alIrAGlosario
     )
 }
 
@@ -82,7 +84,8 @@ fun InicioContent(
     onAvatarClick: () -> Unit,
     onReintentarCategorias: () -> Unit,
     onCategoriaClick: (Int) -> Unit,
-    onReintentarNovedades: () -> Unit
+    onReintentarNovedades: () -> Unit,
+    onAbrirGlosario: () -> Unit
 ) {
 
     Column(
@@ -124,6 +127,15 @@ fun InicioContent(
             onReintentar = onReintentarCategorias,
             onCategoriaClick = onCategoriaClick
         )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = onAbrirGlosario,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Abrir glosario jurídico")
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 

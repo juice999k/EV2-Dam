@@ -21,4 +21,6 @@ object Rutas {
     const val LECTOR = "lector/{$ARGUMENTO_ID_NORMA}"
 
     fun detalleNorma(normaId: Int) = "detalleNorma/$normaId"
+
+    const val GLOSARIO = "glosario"
 }

@@ -70,5 +70,10 @@ object LexisViewModelFactory {
             )
         }
     }
-}
 
+    val glosario = viewModelFactory {
+        initializer {
+            GlosarioViewModel(bibliotecaRepository())
+        }
+    }
+}
