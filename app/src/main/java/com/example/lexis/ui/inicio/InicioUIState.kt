@@ -4,9 +4,9 @@ import com.example.lexis.model.LeyDemo
 
 data class CategoriaLegal(
     val titulo: String,
-    val cantidadNormas: String
+    val id: Int = 0,
+    val descripcion: String = ""
 )
-
 data class CambioReciente(
     val dia: String,
     val mes: String,
@@ -25,11 +25,9 @@ data class InicioUiState(
     val tituloUltimaLectura: String = LeyDemo.TITULO,
     val articuloUltimaLectura: String = "Artículo 5 · Derechos del titular",
     val progresoLectura: Float = 0.68f,
-    val categorias: List<CategoriaLegal> = listOf(
-        CategoriaLegal("Constitucional", "24 normas"),
-        CategoriaLegal("Civil", "38 normas"),
-        CategoriaLegal("Laboral", "19 normas")
-    ),
+    val categorias: List<CategoriaLegal> = emptyList(),
+    val cargandoCategorias: Boolean = false,
+    val errorCategorias: String? = null,
     val cambiosRecientes: List<CambioReciente> = listOf(
         CambioReciente(
             dia = "14",

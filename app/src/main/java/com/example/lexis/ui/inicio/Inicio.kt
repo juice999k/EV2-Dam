@@ -1,5 +1,5 @@
 package com.example.lexis.ui.inicio
- 
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -64,46 +64,52 @@ import com.example.lexis.ui.theme.TextoOscuro
 import com.example.lexis.ui.theme.VerdeConectado
 import com.example.lexis.viewmodel.InicioViewModel
 import com.example.lexis.viewmodel.LexisViewModelFactory
- 
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+
 @Composable
 fun InicioRoute(
     idUsuario: Int,
     alIrAPerfil: () -> Unit,
     alIrALector: () -> Unit,
-    viewModel: InicioViewModel = viewModel(factory = LexisViewModelFactory.inicio(idUsuario))
+    viewModel: InicioViewModel = viewModel(
+        factory = LexisViewModelFactory.inicio(idUsuario)
+    )
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
- 
+
     LifecycleResumeEffect(Unit) {
         viewModel.cargarUsuario()
         onPauseOrDispose { }
     }
- 
+
     InicioContent(
         uiState = uiState,
         onBusquedaChanged = viewModel::onBusquedaChanged,
         onAvatarClick = alIrAPerfil,
-        onContinuarLecturaClick = alIrALector
+        onContinuarLecturaClick = alIrALector,
+        onReintentarCategorias = viewModel::cargarCategorias
     )
 }
- 
+
 @Composable
 fun InicioContent(
     uiState: InicioUiState,
     onBusquedaChanged: (String) -> Unit,
     onAvatarClick: () -> Unit,
-    onContinuarLecturaClick: () -> Unit
+    onContinuarLecturaClick: () -> Unit,
+    onReintentarCategorias: () -> Unit
 ) {
 
     var contenidoVisible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { contenidoVisible = true }
- 
+
     val progresoAnimado by animateFloatAsState(
         targetValue = if (contenidoVisible) uiState.progresoLectura else 0f,
         animationSpec = tween(durationMillis = 1200),
         label = "progresoLectura"
     )
- 
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -112,14 +118,14 @@ fun InicioContent(
             .verticalScroll(rememberScrollState())
     ) {
         EncabezadoInicio(uiState = uiState, onAvatarClick = onAvatarClick)
- 
+
         Spacer(modifier = Modifier.height(20.dp))
- 
+
         Text(uiState.saludo, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = GrisSuave)
         Text("Hola, ${uiState.nombreUsuario}", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextoOscuro)
- 
+
         Spacer(modifier = Modifier.height(16.dp))
- 
+
         OutlinedTextField(
             value = uiState.textoBusqueda,
             onValueChange = onBusquedaChanged,
@@ -135,9 +141,9 @@ fun InicioContent(
                 focusedBorderColor = AzulLexis
             )
         )
- 
+
         Spacer(modifier = Modifier.height(24.dp))
- 
+
         AnimatedVisibility(
             visible = contenidoVisible,
             enter = fadeIn(tween(700)) + slideInVertically(tween(700)) { it / 3 }
@@ -148,17 +154,20 @@ fun InicioContent(
                 alHacerClick = onContinuarLecturaClick
             )
         }
- 
+
         Spacer(modifier = Modifier.height(24.dp))
- 
-        SeccionMaterias(uiState = uiState)
- 
+
+        SeccionMaterias(
+            uiState = uiState,
+            onReintentar = onReintentarCategorias
+        )
+
         Spacer(modifier = Modifier.height(24.dp))
- 
+
         SeccionCambiosRecientes(uiState = uiState)
     }
 }
- 
+
 @Composable
 private fun EncabezadoInicio(uiState: InicioUiState, onAvatarClick: () -> Unit) {
     Row(
@@ -174,7 +183,7 @@ private fun EncabezadoInicio(uiState: InicioUiState, onAvatarClick: () -> Unit) 
                 Text("APP JURÍDICA", fontSize = 9.sp, color = GrisSuave, fontWeight = FontWeight.Medium)
             }
         }
- 
+
         Box {
             AvatarUsuario(
                 iniciales = uiState.iniciales,
@@ -192,7 +201,7 @@ private fun EncabezadoInicio(uiState: InicioUiState, onAvatarClick: () -> Unit) 
         }
     }
 }
- 
+
 @Composable
 private fun TarjetaContinuarLeyendo(
     uiState: InicioUiState,
@@ -225,12 +234,12 @@ private fun TarjetaContinuarLeyendo(
                 }
                 Icon(Icons.Default.BookmarkBorder, contentDescription = "Guardar", tint = Color.White)
             }
- 
+
             Spacer(modifier = Modifier.height(12.dp))
             Text(uiState.tituloUltimaLectura, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))
             Text(uiState.articuloUltimaLectura, color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp)
- 
+
             Spacer(modifier = Modifier.height(16.dp))
             LinearProgressIndicator(
                 progress = { progreso },
@@ -241,7 +250,7 @@ private fun TarjetaContinuarLeyendo(
                 color = AmbarAcento,
                 trackColor = Color.White.copy(alpha = 0.2f)
             )
- 
+
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 "${(progreso * 100).toInt()}% completado",
@@ -251,57 +260,122 @@ private fun TarjetaContinuarLeyendo(
         }
     }
 }
- 
+
 @Composable
-private fun SeccionMaterias(uiState: InicioUiState) {
-    Text("EXPLORA", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = GrisSuave)
-    Text("Materias jurídicas", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextoOscuro)
- 
+private fun SeccionMaterias(
+    uiState: InicioUiState,
+    onReintentar: () -> Unit
+) {
+    Text(
+        text = "EXPLORA",
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Bold,
+        color = GrisSuave
+    )
+
+    Text(
+        text = "Materias jurídicas",
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Bold,
+        color = TextoOscuro
+    )
+
     Spacer(modifier = Modifier.height(8.dp))
- 
-    val categoriasVisibles = uiState.categoriasFiltradas
-    if (categoriasVisibles.isEmpty()) {
-        Text("No hay materias que coincidan con tu búsqueda", fontSize = 12.sp, color = GrisSuave)
+
+    if (uiState.cargandoCategorias) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                strokeWidth = 2.dp,
+                color = AzulLexis
+            )
+            Text(
+                text = "Cargando materias...",
+                fontSize = 13.sp,
+                color = GrisSuave
+            )
+        }
         return
     }
- 
-    Row(
+
+    val error = uiState.errorCategorias
+
+    if (error != null) {
+        Text(
+            text = error,
+            fontSize = 13.sp,
+            color = TextoOscuro
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(onClick = onReintentar) {
+            Text("Reintentar")
+        }
+        return
+    }
+
+    val categoriasVisibles = uiState.categoriasFiltradas
+
+    if (categoriasVisibles.isEmpty()) {
+        Text(
+            text = if (uiState.categorias.isEmpty()) {
+                "No hay materias disponibles."
+            } else {
+                "No hay materias que coincidan con tu búsqueda."
+            },
+            fontSize = 12.sp,
+            color = GrisSuave
+        )
+        return
+    }
+
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         categoriasVisibles.forEach { categoria ->
             Card(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 1.dp
+                )
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(AzulClaro),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("§", color = AzulLexis, fontWeight = FontWeight.Bold)
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(categoria.titulo, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextoOscuro)
-                    Text(categoria.cantidadNormas, fontSize = 10.sp, color = GrisSuave)
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = categoria.titulo,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AzulLexis
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = categoria.descripcion,
+                        fontSize = 13.sp,
+                        color = GrisSuave
+                    )
                 }
             }
         }
     }
 }
- 
+
 @Composable
 private fun SeccionCambiosRecientes(uiState: InicioUiState) {
     Text("AL DÍA", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = GrisSuave)
     Text("Cambios recientes", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextoOscuro)
- 
+
     Spacer(modifier = Modifier.height(8.dp))
- 
+
     uiState.cambiosRecientes.forEach { cambio ->
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -317,9 +391,9 @@ private fun SeccionCambiosRecientes(uiState: InicioUiState) {
                     Text(cambio.dia, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextoOscuro)
                     Text(cambio.mes, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = GrisSuave)
                 }
- 
+
                 Spacer(modifier = Modifier.width(16.dp))
- 
+
                 Column(modifier = Modifier.weight(1f)) {
                     Surface(color = AmbarClaro, shape = RoundedCornerShape(4.dp)) {
                         Text(
@@ -336,7 +410,7 @@ private fun SeccionCambiosRecientes(uiState: InicioUiState) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(cambio.tiempoYCantidad, fontSize = 10.sp, color = GrisSuave)
                 }
- 
+
                 Icon(Icons.Default.ChevronRight, contentDescription = "Ver más", tint = GrisSuave)
             }
         }

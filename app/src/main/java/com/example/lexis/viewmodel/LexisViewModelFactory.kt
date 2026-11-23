@@ -15,6 +15,10 @@ object LexisViewModelFactory {
     private fun CreationExtras.repositorio() =
         (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as LexisApplication)
             .repositorioUsuarios
+
+    private fun CreationExtras.bibliotecaRepository() =
+        (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
+                as LexisApplication).repositorioBiblioteca
  
     val login = viewModelFactory {
         initializer { LoginViewModel(repositorio()) }
@@ -23,8 +27,14 @@ object LexisViewModelFactory {
     val registro = viewModelFactory {
         initializer { RegistroViewModel(repositorio()) }
     }
- 
+
     fun inicio(idUsuario: Int) = viewModelFactory {
-        initializer { InicioViewModel(repositorio(), idUsuario) }
+        initializer {
+            InicioViewModel(
+                repositorio = repositorio(),
+                idUsuario = idUsuario,
+                bibliotecaRepository = bibliotecaRepository()
+            )
+        }
     }
-}
+    }
