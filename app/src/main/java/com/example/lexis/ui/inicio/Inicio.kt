@@ -72,6 +72,7 @@ fun InicioRoute(
     idUsuario: Int,
     alIrAPerfil: () -> Unit,
     alIrALector: () -> Unit,
+    alIrANormas: (Int) -> Unit,
     viewModel: InicioViewModel = viewModel(
         factory = LexisViewModelFactory.inicio(idUsuario)
     )
@@ -88,7 +89,8 @@ fun InicioRoute(
         onBusquedaChanged = viewModel::onBusquedaChanged,
         onAvatarClick = alIrAPerfil,
         onContinuarLecturaClick = alIrALector,
-        onReintentarCategorias = viewModel::cargarCategorias
+        onReintentarCategorias = viewModel::cargarCategorias,
+        onCategoriaClick = alIrANormas
     )
 }
 
@@ -98,7 +100,8 @@ fun InicioContent(
     onBusquedaChanged: (String) -> Unit,
     onAvatarClick: () -> Unit,
     onContinuarLecturaClick: () -> Unit,
-    onReintentarCategorias: () -> Unit
+    onReintentarCategorias: () -> Unit,
+    onCategoriaClick: (Int) -> Unit
 ) {
 
     var contenidoVisible by remember { mutableStateOf(false) }
@@ -159,7 +162,8 @@ fun InicioContent(
 
         SeccionMaterias(
             uiState = uiState,
-            onReintentar = onReintentarCategorias
+            onReintentar = onReintentarCategorias,
+            onCategoriaClick = onCategoriaClick
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -264,7 +268,8 @@ private fun TarjetaContinuarLeyendo(
 @Composable
 private fun SeccionMaterias(
     uiState: InicioUiState,
-    onReintentar: () -> Unit
+    onReintentar: () -> Unit,
+    onCategoriaClick: (Int) -> Unit
 ) {
     Text(
         text = "EXPLORA",
@@ -339,6 +344,7 @@ private fun SeccionMaterias(
     ) {
         categoriasVisibles.forEach { categoria ->
             Card(
+                onClick = { onCategoriaClick(categoria.id) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(

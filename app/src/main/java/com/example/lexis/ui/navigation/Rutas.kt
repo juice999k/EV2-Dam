@@ -11,4 +11,9 @@ object Rutas {
 
     fun inicio(idUsuario: Int) = "inicio/$idUsuario"
     fun perfil(idUsuario: Int) = "perfil/$idUsuario"
+
+    const val ARGUMENTO_ID_CATEGORIA = "categoriaId"
+    const val NORMAS = "normas/{$ARGUMENTO_ID_CATEGORIA}"
+
+    fun normas(categoriaId: Int) = "normas/$categoriaId"
 }

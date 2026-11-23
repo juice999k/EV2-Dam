@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.lexis.ui.inicio.InicioRoute
+import com.example.lexis.ui.normas.NormasRoute
 import com.example.lexis.ui.lector.LectorRoute
 import com.example.lexis.ui.login.LoginRoute
 import com.example.lexis.ui.registro.RegistroRoute
@@ -41,7 +42,27 @@ fun LexisNavHost() {
                 alIrAPerfil = {
                     navController.navigate(Rutas.perfil(idUsuario))
                 },
-                alIrALector = { navController.navigate(Rutas.LECTOR) }
+                alIrALector = { navController.navigate(Rutas.LECTOR) },
+                alIrANormas = { categoriaId ->
+                    navController.navigate(Rutas.normas(categoriaId))
+                }
+            )
+        }
+
+        composable(
+            route = Rutas.NORMAS,
+            arguments = listOf(
+                navArgument(Rutas.ARGUMENTO_ID_CATEGORIA) {
+                    type = NavType.IntType
+                }
+            )
+        ) { entrada ->
+            val categoriaId = requireNotNull(entrada.arguments)
+                .getInt(Rutas.ARGUMENTO_ID_CATEGORIA)
+
+            NormasRoute(
+                categoriaId = categoriaId,
+                alVolver = { navController.popBackStack() }
             )
         }
 
@@ -67,5 +88,5 @@ fun LexisNavHost() {
                 }
             )
         }
-}
+    }
 }
