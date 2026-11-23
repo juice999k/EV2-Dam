@@ -1,7 +1,5 @@
 package com.example.lexis.ui.inicio
 
-import com.example.lexis.model.LeyDemo
-
 data class CategoriaLegal(
     val titulo: String,
     val id: Int = 0,
@@ -22,9 +20,6 @@ data class InicioUiState(
     val rutaFotoPerfil: String? = null,
     val saludo: String = "",
     val textoBusqueda: String = "",
-    val tituloUltimaLectura: String = LeyDemo.TITULO,
-    val articuloUltimaLectura: String = "Artículo 5 · Derechos del titular",
-    val progresoLectura: Float = 0.68f,
     val categorias: List<CategoriaLegal> = emptyList(),
     val cargandoCategorias: Boolean = false,
     val errorCategorias: String? = null,

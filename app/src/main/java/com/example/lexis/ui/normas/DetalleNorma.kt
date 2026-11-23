@@ -35,6 +35,7 @@ import com.example.lexis.viewmodel.LexisViewModelFactory
 fun DetalleNormaRoute(
     normaId: Int,
     alVolver: () -> Unit,
+    alLeerArticulos: (Int) -> Unit,
     viewModel: DetalleNormaViewModel = viewModel(
         factory = LexisViewModelFactory.detalleNorma(normaId)
     )
@@ -44,7 +45,8 @@ fun DetalleNormaRoute(
     DetalleNormaContent(
         uiState = uiState,
         onVolver = alVolver,
-        onReintentar = viewModel::cargarNorma
+        onReintentar = viewModel::cargarNorma,
+        onLeerArticulos = alLeerArticulos
     )
 }
 
@@ -53,12 +55,15 @@ fun DetalleNormaRoute(
 fun DetalleNormaContent(
     uiState: DetalleNormaUiState,
     onVolver: () -> Unit,
-    onReintentar: () -> Unit
+    onReintentar: () -> Unit,
+    onLeerArticulos: (Int) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Detalle de la norma") },
+                title = {
+                    Text("Detalle de la norma")
+                },
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
                         Icon(
@@ -129,6 +134,16 @@ fun DetalleNormaContent(
                             text = norma.resumen,
                             style = MaterialTheme.typography.bodyLarge
                         )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Button(
+                            onClick = {
+                                onLeerArticulos(norma.id)
+                            }
+                        ) {
+                            Text("Leer artículos")
+                        }
 
                         if (norma.esDemo) {
                             Spacer(modifier = Modifier.height(24.dp))

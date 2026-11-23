@@ -1,10 +1,5 @@
 package com.example.lexis.ui.inicio
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,23 +17,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,12 +40,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lexis.ui.components.AvatarUsuario
 import com.example.lexis.ui.components.LogoAnimado
-import com.example.lexis.ui.theme.AmbarAcento
 import com.example.lexis.ui.theme.AmbarClaro
 import com.example.lexis.ui.theme.AmbarOscuro
-import com.example.lexis.ui.theme.AzulClaro
 import com.example.lexis.ui.theme.AzulLexis
-import com.example.lexis.ui.theme.AzulProfundo
 import com.example.lexis.ui.theme.BordeSuave
 import com.example.lexis.ui.theme.FondoClaro
 import com.example.lexis.ui.theme.GrisSuave
@@ -71,7 +57,6 @@ import androidx.compose.material3.CircularProgressIndicator
 fun InicioRoute(
     idUsuario: Int,
     alIrAPerfil: () -> Unit,
-    alIrALector: () -> Unit,
     alIrANormas: (Int) -> Unit,
     viewModel: InicioViewModel = viewModel(
         factory = LexisViewModelFactory.inicio(idUsuario)
@@ -88,7 +73,6 @@ fun InicioRoute(
         uiState = uiState,
         onBusquedaChanged = viewModel::onBusquedaChanged,
         onAvatarClick = alIrAPerfil,
-        onContinuarLecturaClick = alIrALector,
         onReintentarCategorias = viewModel::cargarCategorias,
         onCategoriaClick = alIrANormas
     )
@@ -99,19 +83,9 @@ fun InicioContent(
     uiState: InicioUiState,
     onBusquedaChanged: (String) -> Unit,
     onAvatarClick: () -> Unit,
-    onContinuarLecturaClick: () -> Unit,
     onReintentarCategorias: () -> Unit,
     onCategoriaClick: (Int) -> Unit
 ) {
-
-    var contenidoVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { contenidoVisible = true }
-
-    val progresoAnimado by animateFloatAsState(
-        targetValue = if (contenidoVisible) uiState.progresoLectura else 0f,
-        animationSpec = tween(durationMillis = 1200),
-        label = "progresoLectura"
-    )
 
     Column(
         modifier = Modifier
@@ -144,19 +118,6 @@ fun InicioContent(
                 focusedBorderColor = AzulLexis
             )
         )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        AnimatedVisibility(
-            visible = contenidoVisible,
-            enter = fadeIn(tween(700)) + slideInVertically(tween(700)) { it / 3 }
-        ) {
-            TarjetaContinuarLeyendo(
-                uiState = uiState,
-                progreso = progresoAnimado,
-                alHacerClick = onContinuarLecturaClick
-            )
-        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -201,65 +162,6 @@ private fun EncabezadoInicio(uiState: InicioUiState, onAvatarClick: () -> Unit) 
                     .clip(CircleShape)
                     .background(VerdeConectado)
                     .align(Alignment.BottomEnd)
-            )
-        }
-    }
-}
-
-@Composable
-private fun TarjetaContinuarLeyendo(
-    uiState: InicioUiState,
-    progreso: Float,
-    alHacerClick: () -> Unit
-) {
-    Card(
-        onClick = alHacerClick,
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = AzulProfundo),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    color = Color.White.copy(alpha = 0.2f),
-                    shape = RoundedCornerShape(4.dp)
-                ) {
-                    Text(
-                        "CONTINUAR LEYENDO",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        fontSize = 10.sp,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Icon(Icons.Default.BookmarkBorder, contentDescription = "Guardar", tint = Color.White)
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(uiState.tituloUltimaLectura, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(uiState.articuloUltimaLectura, color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp)
-
-            Spacer(modifier = Modifier.height(16.dp))
-            LinearProgressIndicator(
-                progress = { progreso },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp)),
-                color = AmbarAcento,
-                trackColor = Color.White.copy(alpha = 0.2f)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                "${(progreso * 100).toInt()}% completado",
-                color = Color.White.copy(alpha = 0.7f),
-                fontSize = 11.sp
             )
         }
     }

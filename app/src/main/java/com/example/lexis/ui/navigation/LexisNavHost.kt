@@ -63,9 +63,6 @@ fun LexisNavHost() {
                 alIrAPerfil = {
                     navController.navigate(Rutas.perfil(idUsuario))
                 },
-                alIrALector = {
-                    navController.navigate(Rutas.LECTOR)
-                },
                 alIrANormas = { categoriaId ->
                     navController.navigate(Rutas.normas(categoriaId))
                 }
@@ -109,12 +106,26 @@ fun LexisNavHost() {
                 normaId = normaId,
                 alVolver = {
                     navController.popBackStack()
+                },
+                alLeerArticulos = { idNorma ->
+                    navController.navigate(Rutas.lector(idNorma))
                 }
             )
         }
 
-        composable(Rutas.LECTOR) {
+        composable(
+            route = Rutas.LECTOR,
+            arguments = listOf(
+                navArgument(Rutas.ARGUMENTO_ID_NORMA) {
+                    type = NavType.IntType
+                }
+            )
+        ) { entrada ->
+            val normaId = requireNotNull(entrada.arguments)
+                .getInt(Rutas.ARGUMENTO_ID_NORMA)
+
             LectorRoute(
+                normaId = normaId,
                 alVolver = {
                     navController.popBackStack()
                 }

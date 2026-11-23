@@ -61,4 +61,14 @@ object LexisViewModelFactory {
             )
         }
     }
+
+    fun lector(normaId: Int) = viewModelFactory {
+        initializer {
+            LectorViewModel(
+                repositorio = bibliotecaRepository(),
+                normaId = normaId
+            )
+        }
+    }
 }
+
