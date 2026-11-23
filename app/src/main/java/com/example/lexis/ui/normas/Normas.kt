@@ -39,6 +39,7 @@ import com.example.lexis.viewmodel.NormasViewModel
 fun NormasRoute(
     categoriaId: Int,
     alVolver: () -> Unit,
+    alIrADetalle: (Int) -> Unit,
     viewModel: NormasViewModel = viewModel(
         factory = LexisViewModelFactory.normas(categoriaId)
     )
@@ -48,7 +49,8 @@ fun NormasRoute(
     NormasContent(
         uiState = uiState,
         onVolver = alVolver,
-        onReintentar = viewModel::cargarNormas
+        onReintentar = viewModel::cargarNormas,
+        onNormaClick = alIrADetalle
     )
 }
 
@@ -57,7 +59,8 @@ fun NormasRoute(
 fun NormasContent(
     uiState: NormasUiState,
     onVolver: () -> Unit,
-    onReintentar: () -> Unit
+    onReintentar: () -> Unit,
+    onNormaClick: (Int) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -132,6 +135,7 @@ fun NormasContent(
                             key = { norma -> norma.id }
                         ) { norma ->
                             Card(
+                                onClick = { onNormaClick(norma.id) },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = CardDefaults.cardColors(
                                     containerColor =

@@ -16,4 +16,8 @@ object Rutas {
     const val NORMAS = "normas/{$ARGUMENTO_ID_CATEGORIA}"
 
     fun normas(categoriaId: Int) = "normas/$categoriaId"
+    const val ARGUMENTO_ID_NORMA = "normaId"
+    const val DETALLE_NORMA = "detalleNorma/{$ARGUMENTO_ID_NORMA}"
+
+    fun detalleNorma(normaId: Int) = "detalleNorma/$normaId"
 }

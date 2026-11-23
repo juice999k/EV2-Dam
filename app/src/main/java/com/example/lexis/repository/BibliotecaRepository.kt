@@ -14,4 +14,7 @@ class BibliotecaRepository(
     suspend fun obtenerNormas(categoriaId: Int): List<NormaDto> {
         return api.obtenerNormas(categoriaId)
     }
+    suspend fun obtenerNorma(normaId: Int): NormaDto {
+        return api.obtenerNorma(normaId)
+    }
 }

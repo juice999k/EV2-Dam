@@ -52,4 +52,13 @@ object LexisViewModelFactory {
             )
         }
     }
+
+    fun detalleNorma(normaId: Int) = viewModelFactory {
+        initializer {
+            DetalleNormaViewModel(
+                repositorio = bibliotecaRepository(),
+                normaId = normaId
+            )
+        }
+    }
 }
