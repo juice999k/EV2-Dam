@@ -1,5 +1,8 @@
 package com.example.lexis.ui.lector
 
+import android.content.ActivityNotFoundException
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,12 +22,23 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalContext
+import com.example.lexis.util.guardarTextoEnArchivo
+import java.io.IOException
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -44,13 +58,61 @@ fun LectorRoute(
     )
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val contexto = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val snackbar = remember { SnackbarHostState() }
+    var textoPendiente by rememberSaveable { mutableStateOf("") }
+    var exportando by rememberSaveable { mutableStateOf(false) }
+
+    val crearArchivo = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/plain")
+    ) { uri ->
+        val texto = textoPendiente
+        textoPendiente = ""
+
+        if (uri == null) {
+            exportando = false
+        } else {
+            scope.launch {
+                val mensaje = try {
+                    guardarTextoEnArchivo(contexto.contentResolver, uri, texto)
+                    "Archivo guardado correctamente."
+                } catch (excepcion: IOException) {
+                    "No se pudo guardar el archivo. Inténtalo nuevamente."
+                } catch (excepcion: SecurityException) {
+                    "No se pudo acceder a la ubicación seleccionada."
+                } finally {
+                    exportando = false
+                }
+                snackbar.showSnackbar(mensaje)
+            }
+        }
+    }
 
     LectorContent(
         uiState = uiState,
         onAumentarLetra = viewModel::onAumentarLetra,
         onDisminuirLetra = viewModel::onDisminuirLetra,
         onVolverClick = alVolver,
-        onReintentar = viewModel::cargarArticulos
+        onReintentar = viewModel::cargarArticulos,
+        snackbarHostState = snackbar,
+        exportando = exportando,
+        onExportar = {
+            val texto = viewModel.generarTextoExportacion()
+            if (texto.isNotBlank() && !exportando) {
+                textoPendiente = texto
+                exportando = true
+                try {
+                    crearArchivo.launch("lexis_norma_${normaId}.txt")
+                } catch (excepcion: ActivityNotFoundException) {
+                    textoPendiente = ""
+                    exportando = false
+                    scope.launch {
+                        snackbar.showSnackbar("No se encontró un selector de archivos disponible.")
+                    }
+                }
+            }
+        }
     )
 }
 
@@ -61,9 +123,13 @@ fun LectorContent(
     onAumentarLetra: () -> Unit,
     onDisminuirLetra: () -> Unit,
     onVolverClick: () -> Unit,
-    onReintentar: () -> Unit
+    onReintentar: () -> Unit,
+    snackbarHostState: SnackbarHostState,
+    exportando: Boolean,
+    onExportar: () -> Unit
 ) {
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -81,6 +147,14 @@ fun LectorContent(
                     }
                 },
                 actions = {
+                    TextButton(
+                        onClick = onExportar,
+                        enabled = !exportando && !uiState.cargando &&
+                                uiState.error == null && uiState.articulos.isNotEmpty()
+                    ) {
+                        Text(if (exportando) "Guardando..." else "Guardar")
+                    }
+
                     TextButton(
                         onClick = onDisminuirLetra,
                         enabled = uiState.tamanoLetra > 12

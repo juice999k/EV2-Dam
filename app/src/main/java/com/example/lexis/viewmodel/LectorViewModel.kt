@@ -62,6 +62,24 @@ class LectorViewModel(
         }
     }
 
+    fun generarTextoExportacion(): String {
+        val estado = _uiState.value
+        if (estado.cargando || estado.error != null || estado.articulos.isEmpty()) return ""
+
+        return buildString {
+            appendLine(estado.tituloLey)
+            appendLine()
+            appendLine("Exportado desde Lexis. Selección de contenido educativo; consulta las fuentes oficiales.")
+            appendLine()
+
+            estado.articulos.forEach { articulo ->
+                appendLine("Artículo ${articulo.numero}: ${articulo.titulo}")
+                appendLine(articulo.contenido)
+                appendLine()
+            }
+        }
+    }
+
     fun onAumentarLetra() {
         _uiState.update {
             it.copy(
