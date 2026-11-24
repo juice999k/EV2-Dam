@@ -6,6 +6,8 @@ import com.example.lexis.remote.LexisApiService
 import com.example.lexis.model.NormaDto
 import com.example.lexis.model.ArticuloDto
 import com.example.lexis.model.NovedadDto
+import com.example.lexis.model.ReporteRequest
+import com.example.lexis.model.ReporteDto
 
 class BibliotecaRepository(
     private val api: LexisApiService
@@ -30,5 +32,17 @@ class BibliotecaRepository(
 
     suspend fun obtenerGlosario(): List<TerminoDto> {
         return api.obtenerGlosario().sortedBy { it.termino.lowercase() }
+    }
+
+    suspend fun enviarReporte(
+        normaId: Int,
+        descripcion: String
+    ): ReporteDto {
+        return api.enviarReporte(
+            ReporteRequest(
+                normaId = normaId,
+                descripcion = descripcion.trim()
+            )
+        )
     }
 }

@@ -9,6 +9,10 @@ import retrofit2.http.Query
 import retrofit2.http.Path
 import com.example.lexis.model.ArticuloDto
 import com.example.lexis.model.NovedadDto
+import com.example.lexis.model.ReporteRequest
+import com.example.lexis.model.ReporteDto
+import retrofit2.http.Body
+import retrofit2.http.POST
 
 interface LexisApiService {
 
@@ -31,4 +35,9 @@ interface LexisApiService {
 
     @GET("glosario")
     suspend fun obtenerGlosario(): List<TerminoDto>
+
+    @POST("reporte")
+    suspend fun enviarReporte(
+        @Body reporte: ReporteRequest
+    ): ReporteDto
 }

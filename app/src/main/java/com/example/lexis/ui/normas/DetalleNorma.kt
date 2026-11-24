@@ -11,6 +11,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,7 +50,12 @@ fun DetalleNormaRoute(
         uiState = uiState,
         onVolver = alVolver,
         onReintentar = viewModel::cargarNorma,
-        onLeerArticulos = alLeerArticulos
+        onLeerArticulos = alLeerArticulos,
+        onAbrirReporte = viewModel::abrirFormularioReporte,
+        onCerrarReporte = viewModel::cerrarFormularioReporte,
+        onDescripcionReporteChanged = viewModel::onDescripcionReporteChanged,
+        onEnviarReporte = viewModel::enviarReporte,
+        onCerrarConfirmacion = viewModel::cerrarConfirmacionReporte
     )
 }
 
@@ -56,7 +65,12 @@ fun DetalleNormaContent(
     uiState: DetalleNormaUiState,
     onVolver: () -> Unit,
     onReintentar: () -> Unit,
-    onLeerArticulos: (Int) -> Unit
+    onLeerArticulos: (Int) -> Unit,
+    onAbrirReporte: () -> Unit,
+    onCerrarReporte: () -> Unit,
+    onDescripcionReporteChanged: (String) -> Unit,
+    onEnviarReporte: () -> Unit,
+    onCerrarConfirmacion: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -145,6 +159,12 @@ fun DetalleNormaContent(
                             Text("Leer artículos")
                         }
 
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedButton(onClick = onAbrirReporte) {
+                            Text("Reportar un problema")
+                        }
+
                         if (norma.esDemo) {
                             Spacer(modifier = Modifier.height(24.dp))
 
@@ -167,5 +187,73 @@ fun DetalleNormaContent(
                 }
             }
         }
+    }
+
+    if (uiState.mostrarFormularioReporte) {
+        AlertDialog(
+            onDismissRequest = onCerrarReporte,
+            title = { Text("Reportar un problema") },
+            text = {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text("Describe el problema de esta norma. No incluyas datos personales.")
+
+                    OutlinedTextField(
+                        value = uiState.descripcionReporte,
+                        onValueChange = onDescripcionReporteChanged,
+                        label = { Text("Descripción") },
+                        enabled = !uiState.enviandoReporte,
+                        minLines = 3,
+                        maxLines = 6,
+                        isError = uiState.errorDescripcionReporte != null,
+                        supportingText = {
+                            Text(
+                                uiState.errorDescripcionReporte
+                                    ?: "Entre 10 y 1000 caracteres."
+                            )
+                        }
+                    )
+
+                    uiState.errorEnvioReporte?.let { mensaje ->
+                        Text(mensaje, color = MaterialTheme.colorScheme.error)
+                    }
+
+                    if (uiState.enviandoReporte) {
+                        Text("Enviando reporte...")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = onEnviarReporte,
+                    enabled = !uiState.enviandoReporte
+                ) {
+                    Text("Enviar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = onCerrarReporte,
+                    enabled = !uiState.enviandoReporte
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    if (uiState.mostrarConfirmacionReporte) {
+        AlertDialog(
+            onDismissRequest = onCerrarConfirmacion,
+            title = { Text("Reporte enviado") },
+            text = { Text("El reporte se guardó correctamente. Gracias por tu ayuda.") },
+            confirmButton = {
+                TextButton(onClick = onCerrarConfirmacion) {
+                    Text("Aceptar")
+                }
+            }
+        )
     }
 }

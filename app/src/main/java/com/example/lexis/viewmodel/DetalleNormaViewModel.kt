@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.lexis.repository.BibliotecaRepository
 import com.example.lexis.ui.normas.DetalleNormaUiState
+import com.example.lexis.util.ValidadorReporte
 import java.io.IOException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,6 +59,85 @@ class DetalleNormaViewModel(
                         } else {
                             "No se pudo cargar el detalle de la norma."
                         }
+                    )
+                }
+            }
+        }
+    }
+
+    fun abrirFormularioReporte() {
+        if (_uiState.value.norma == null) return
+        _uiState.update {
+            it.copy(
+                mostrarFormularioReporte = true,
+                descripcionReporte = "",
+                errorDescripcionReporte = null,
+                errorEnvioReporte = null,
+                mostrarConfirmacionReporte = false
+            )
+        }
+    }
+
+    fun cerrarFormularioReporte() {
+        if (_uiState.value.enviandoReporte) return
+        _uiState.update { it.copy(mostrarFormularioReporte = false) }
+    }
+
+    fun onDescripcionReporteChanged(texto: String) {
+        if (_uiState.value.enviandoReporte) return
+        _uiState.update {
+            it.copy(
+                descripcionReporte = texto,
+                errorDescripcionReporte = null,
+                errorEnvioReporte = null
+            )
+        }
+    }
+
+    fun cerrarConfirmacionReporte() {
+        _uiState.update { it.copy(mostrarConfirmacionReporte = false) }
+    }
+
+    fun enviarReporte() {
+        val estado = _uiState.value
+        if (estado.enviandoReporte || estado.norma == null) return
+
+        val errorDescripcion = ValidadorReporte.validarDescripcion(estado.descripcionReporte)
+        if (errorDescripcion != null) {
+            _uiState.update { it.copy(errorDescripcionReporte = errorDescripcion) }
+            return
+        }
+
+        // Activar antes de lanzar evita envíos simultáneos desde el botón.
+        _uiState.update {
+            it.copy(enviandoReporte = true, errorEnvioReporte = null)
+        }
+
+        viewModelScope.launch {
+            try {
+                repositorio.enviarReporte(normaId, estado.descripcionReporte)
+                _uiState.update {
+                    it.copy(
+                        enviandoReporte = false,
+                        mostrarFormularioReporte = false,
+                        descripcionReporte = "",
+                        errorDescripcionReporte = null,
+                        errorEnvioReporte = null,
+                        mostrarConfirmacionReporte = true
+                    )
+                }
+            } catch (excepcion: IOException) {
+                _uiState.update {
+                    it.copy(
+                        enviandoReporte = false,
+                        errorEnvioReporte = "No se pudo confirmar el envío. Revisa tu conexión."
+                    )
+                }
+            } catch (excepcion: HttpException) {
+                _uiState.update {
+                    it.copy(
+                        enviandoReporte = false,
+                        errorEnvioReporte = "El servidor rechazó el reporte. Revisa los datos e inténtalo nuevamente."
                     )
                 }
             }
